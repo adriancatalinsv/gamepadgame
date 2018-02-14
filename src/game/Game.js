@@ -1,13 +1,9 @@
-import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Component } from 'react';
+import './Game.css';
 
 class App extends Component {
     constructor() {
         super();
-        window.addEventListener( 'gamepadconnected', ( e ) => {
-            console.log( e );
-        } );
     }
     render() {
         return (
