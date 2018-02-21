@@ -3,33 +3,33 @@ import ReactDOM from 'react-dom';
 import './index.css';
 import App from './app/App';
 import registerServiceWorker from './registerServiceWorker';
-const controllers = {};
-const rAF = window.mozRequestAnimationFrame ||
-    window.webkitRequestAnimationFrame ||
-    window.requestAnimationFrame;
-function updateStatus() {
-    scangamepads();
-    for (var i = 0; i < controllers[0].buttons.length; i++) {
-            var val = controllers[0].buttons[i];
-            if (typeof (val) === "object" && val.pressed ) {
-                console.log(val);
-            }
-        }
 
-        rAF(updateStatus);
-    }
-function scangamepads() {
-    var gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads() : []);
-    for (var i = 0; i < gamepads.length; i++) {
-        if (gamepads[i]) {
-            controllers[gamepads[i].index] = gamepads[i];
-        }
+const controllers = {};
+let controllersCache = {};
+const rAF = window.requestAnimationFrame;
+const axes = [];
+const buttons = {};
+function update( gamepad ) {
+    scan( gamepad );
+    rAF( update );
+}
+function scan( defaultGamepad ) {
+    controllersCache = {... controllers};
+    if ( defaultGamepad && defaultGamepad instanceof Object ) {
+        controllers[ defaultGamepad.index ] = defaultGamepad;
+    } else {
+        Object.entries( navigator.getGamepads() ).forEach( ( [ idx, gamepad ] ) => {
+            if ( gamepad ) {
+                controllers[ gamepad.index ] = gamepad;
+            }
+        } );
     }
 }
-window.addEventListener('gamepadconnected', (e) => {
-    controllers[e.gamepad.index] = e.gamepad;
-    console.log(controllers[0]);
-    rAF(updateStatus);
-});
+// Initialize gamepad
+window.addEventListener( 'gamepadconnected', ( event ) => {
+    update( event.gamepad );
+} );
+
 ReactDOM.render(<App />, document.getElementById('root'));
+
 registerServiceWorker();
